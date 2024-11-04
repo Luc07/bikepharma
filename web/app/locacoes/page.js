@@ -3,9 +3,11 @@ import { useState } from 'react';
 import LocacoesTable from '../components/LocacoesTable';
 import NovaLocacaoModal from '../components/NovaLocacaoModal';
 import { useAuth } from '../context/AuthContext';
+import CadastrarBicicletaModal from '../components/NovaBicicletaModal';
 
 export default function LocacoesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCadastrarBicicletaModalOpen, setIsCadastrarBicicletaModalOpen] = useState(false);
   const { user } = useAuth();
 
   return (
@@ -19,15 +21,16 @@ export default function LocacoesPage() {
         </div>
        
        <div className='flex items-center justify-center'>
-          <div className='flex flex-col w-screen p-[4rem] gap-6'>
+          <div className='flex flex-col w-screen p-[38px] gap-6'>
             <div className='flex justify-between'>
               <button className="btn btn-outline btn-success" onClick={() => setIsModalOpen(true)}>+ Nova Locação</button>
-              <button className="btn btn-outline btn-success">+ Cadastrar Bicicleta</button>
+              <button className="btn btn-outline btn-success" onClick={() => setIsCadastrarBicicletaModalOpen(true)}>+ Cadastrar Bicicleta</button>
             </div>
             <LocacoesTable departmentId={user?.department_id}/>
           </div>
        </div>
         <NovaLocacaoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} departmentId={user?.department_id}/>
+        <CadastrarBicicletaModal isOpen={isCadastrarBicicletaModalOpen} onClose={() => setIsCadastrarBicicletaModalOpen(false)} departmentId={user?.department_id}/>
       </div>
     </main>
   );

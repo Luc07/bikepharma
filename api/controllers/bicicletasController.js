@@ -1,7 +1,7 @@
 const pool = require('../db');
 
 async function registrarBicicleta(req, res) {
-  const { id_bicicleta, modelo } = req.body;
+  const { numero, modelo, preco, preco_hr, filial } = req.body;
 
   if (!modelo) {
     return res.status(400).json({ message: 'Modelo da bicicleta é obrigatório.' });
@@ -9,17 +9,17 @@ async function registrarBicicleta(req, res) {
 
   try {
     const [result] = await pool.query(`
-      INSERT INTO bicicletas (id_bicicleta, id_filial, modelo, preco_hr) VALUES (?, 1, ?, 20)
-    `, [id_bicicleta, modelo]);
+      INSERT INTO bicicletas (id_bicicleta, id_filial, modelo, preco, preco_hr) VALUES (?, ?, ?, ?, ?)
+    `, [numero, filial, modelo, preco, preco_hr]);
 
     res.status(201).json({
-      id: id_bicicleta,
+      id: numero,
       modelo,
       disponibilidade: true,
       data_registro: new Date()
     });
   } catch (error) {
-    console.error('Erro ao registrar a bicicleta:', error);
+    console.error('Erro ao registrar a bicicleta:');
     res.status(500).json({ message: 'Erro ao registrar a bicicleta.' });
   }
 }

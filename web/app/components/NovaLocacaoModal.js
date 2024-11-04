@@ -25,7 +25,6 @@ function NovaLocacaoModal({ isOpen, onClose, departmentId }) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clientes?search=${cpfNome}`);
       const data = await response.json();
-      console.log(data)
       if (response.status !== 200 || !data[0]) {
         setCliente(null);
         setNome('');
@@ -35,7 +34,6 @@ function NovaLocacaoModal({ isOpen, onClose, departmentId }) {
         setNovoCliente(true);
       } else {
         setCliente(data[0]);
-        console.log(cliente)
         setNome(data[0].nome);
         setCpf(data[0].cpf);
         setTelefone(data[0].telefone || '');
@@ -126,7 +124,7 @@ function NovaLocacaoModal({ isOpen, onClose, departmentId }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-[#15191E] rounded-lg p-8 w-full max-w-lg relative shadow-lg">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">X</button>
+        <div onClick={onClose} className="absolute top-4 right-4 text-white cursor-pointer border-2 rounded-full w-[30px] h-[30px] flex items-center justify-center">X</div>
         <h2 className="text-2xl font-bold mb-6 text-center">Registrar Nova Locação</h2>
         
         <form className="space-y-4">
@@ -137,7 +135,7 @@ function NovaLocacaoModal({ isOpen, onClose, departmentId }) {
             onChange={(e) => setCpfNome(e.target.value)}
             className="input w-full"
           />
-          <button type="button" onClick={buscarCliente} className="w-full btn btn-primary mt-2">
+          <button type="button" onClick={buscarCliente} className="w-full btn btn-primary mt-2 hover:scale-105 transition-transform duration-300 ease-in-out">
             Buscar Cliente
           </button>
 
@@ -206,7 +204,7 @@ function NovaLocacaoModal({ isOpen, onClose, departmentId }) {
           <button
             type="submit"
             onClick={criarLocacao}
-            className="w-full btn btn-success mt-6"
+            className="w-full btn btn-success mt-6 hover:scale-105 transition-transform duration-300 ease-in-out"
           >
             Finalizar Locação
           </button>
