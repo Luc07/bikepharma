@@ -24,12 +24,21 @@ export default function CadastrarBicicletaModal({ isOpen, onClose, departmentId 
         novaBicicleta
       })
       onClose();
+      limparForm();
     } catch (error) {
-      console.error('Erro ao cadastrar bicicleta:');
+      console.error('Erro ao cadastrar bicicleta:', error);
     }
   };
 
   if (!isOpen || departmentId != 1) return null;
+
+  const limparForm = () => {
+    setNumero('');
+    setModelo('');
+    setPreco('');
+    setPrecoHr('')
+    setFilial('1055');
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

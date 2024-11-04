@@ -1,10 +1,11 @@
 const pool = require('../db');
 
 async function registrarBicicleta(req, res) {
-  const { numero, modelo, preco, preco_hr, filial } = req.body;
+  const bicicleta = req.body.novaBicicleta
+  const { numero, modelo, preco, preco_hr, filial } = bicicleta;
 
-  if (!modelo) {
-    return res.status(400).json({ message: 'Modelo da bicicleta é obrigatório.' });
+  if (!numero || !modelo) {
+    return res.status(400).json({ message: 'Modelo e numero da bicicleta são obrigatórios.' });
   }
 
   try {

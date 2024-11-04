@@ -59,10 +59,12 @@ function LocacoesTable({ departmentId, user }) {
     }
 
     setFilteredLocacoes(filtered);
-    setCurrentPage(1);
+    if (startDate || endDate || statusFilter) {
+      setCurrentPage(1);
+    }
   }
 
-  async function handleStatusChange(id, newStatus, horas) {
+  async function handleStatusChange(id, newStatus, horas, page) {
     try {
       const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/locacoes/${id}/status`, {
         status: newStatus,
@@ -80,6 +82,7 @@ function LocacoesTable({ departmentId, user }) {
           return locacao;
         })
       );
+      setCurrentPage(page)
     } catch (error) {
       console.error('Erro ao atualizar o status da locação:', error);
     }
@@ -87,42 +90,138 @@ function LocacoesTable({ departmentId, user }) {
 
   function imprimirCupom(locacao) {
     const cupomContent = `
-    --Cupom de Finalização da Locação--
-
-    ID: ${locacao.id_locacao}
-    Bicicleta: ${locacao.id_bicicleta}
-    Cliente: ${locacao.nome}
-    Valor: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.valor_total)}
-    Data Gerado: ${date.format(new Date(), 'DD/MM/YYYY [ás] HH:mm:ss')}
-
-    Muito Obrigado pela Sua Doação!
+    <html>
+      <head>
+        <style>
+          body {
+            font-size: 18px; /* Define o tamanho da fonte */
+            font-family: Arial, sans-serif; /* Define a fonte */
+            line-height: 1.5; /* Define o espaçamento entre linhas */
+            text-align: center;
+          }
+          h2 {
+            font-size: 20px;
+            font-weight: bold;
+          }
+          .cupom-info {
+            margin-top: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>--Cupom de Finalização da Locação--</h2>
+        <p><strong>ID do Cupom:</strong> ${locacao.id_locacao}</p>
+        <p><strong>Bicicleta:</strong> ${locacao.id_bicicleta}</p>
+        <p><strong>Cliente:</strong> ${locacao.nome}</p>
+        <p><strong>Valor:</strong> ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.valor_total)}</p>
+        <p><strong>Data:</strong> ${new Date(locacao.data_fim).toLocaleDateString('pt-BR')} às ${new Date(locacao.data_fim).toLocaleTimeString('pt-BR')}</p>
+        
+        <p class="cupom-info">Muito Obrigado pela Sua Doação!</p>
+      </body>
+    </html>
     `;
+
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<pre>${cupomContent}</pre>`);
+    printWindow.document.write(cupomContent);
     printWindow.document.close();
     printWindow.print();
   }
 
   function imprimirTermoAceite(locacao) {
     const termoContent = `
-      Termo de Aceite
-      Nome: ${locacao.nome}
-      CPF: ${locacao.cpf}
-      Telefone: ${locacao.telefone}
-      Endereço: ${locacao.endereco}
-      Data Atual: ${date.format(new Date(), 'DD/MM/YYYY')}
+  <html>
+      <head>
+        <style>
+          body {
+            font-size: 18px; /* Define o tamanho da fonte */
+            font-family: Arial, sans-serif; /* Define a fonte */
+            display: flex;
+            line-height: normal;
+            flex-direction: column;
+            align-items: center;
+          }
+          .assinatura {
+            margin-top: 20px;
+          }
+          .section {
+            margin-bottom: 20px;
+          }
+          .page2 {
+            page-break-before: always;
+          }
+        </style>
+      </head>
+      <body>
+        <h4>TERMO DE USO E RESPONSABILIDADE DA BIKEPHARMA</h4>
+        <div class="section">
+          O presente termo rege a utilização pelos clientes da Bikepharma e seu aluguel. Inicialmente você já concorda e entendeu todos as diretrizes de uso e sua responsabilidade ao utilizar o serviço.
+        </div>
+        <div class="section">
+          O objetivo de disponibilizar a bicicleta para utilização pelos usuários aos arredores da Redepharma é reafirmar nosso propósito enraizado na cultura da empresa, a promoção da saúde e bem-estar de todos nossos clientes.
+        </div>
+        <div class="section">
+          Além disso, vale ressaltar que todo valor arrecadado pelo projeto Bikepharma será destinado ao Hospital da FAP, localizado na cidade de Campina Grande - Paraíba, como forma de doação e com o intuito de, solidariamente, ajudar esse hospital que presta um serviço necessário a toda população campinense e de regiões vizinhas.
+        </div>
+        <div class="section">
+          O aluguel será no valor mínimo de R$ 10,00 (10 reais), porém caso você sinta o desejo e a motivação de doar mais algum valor, sinta-se à vontade para alugar a bicicleta pelo valor que você achar essencial que será para bem um maior.
+        </div>
+        <div class="section">
+          O tempo máximo do aluguel será de 1 hora, com possibilidade de renovar a concessão por mais 30 minutos.
+        </div>
+        <div class="section">
+          É necessário realizar um cadastro prévio, de forma verdadeira e completa, devendo estar em porte um documento com foto (ex.: RG, passaporte, carteira da OAB, CNH etc.) que comprovem a identidade da pessoa que estará utilizando, bem como assinar o presente termo e realizar o pagamento para o colaborador responsável da Redepharma.
+        </div>
+        <div class="section">
+          A bicicleta tem uso individual e intransferível, apenas em casos do responsável legal alugar para o menor.
+        </div>
+        <div class="section">
+          Ao assinar o termo de uso e responsabilidade, o locatário se compromete a utilizar a bicicleta de forma responsável e cumprir o prazo estabelecido de tempo, devolvendo sem nenhum vício ou defeito e não utilizando de forma inadequada, sob pena de arcar com os custos de consertos.
+        </div>
+        <div class="section">
+          O uso inadequado da bicicleta é qualquer conduta que extrapole o uso comum de uma bicicleta urbana, como por exemplo: pedalar erguendo a roda dianteira da bicicleta; utilizar o freio dianteiro para erguer a parte traseira da bicicleta ou o freio traseiro para realizar derrapagens, pedalar em velocidade inadequada à via em que transita ou em desacordo com as normas de trânsito.
+        </div>
+        <div class="section">
+          É proibido a utilização da bicicleta para fins de prestação de serviços (ex.: comerciais, entregador de delivery etc.) e que não seja para lazer, e deverá circular pelas redondezas da Redepharma, do Açude Velho e Parque da Criança.
+        </div>
+        <div class="section">
+          Todas as bicicletas terão um chip de localização, para controle e segurança de possíveis usos inadequados, como sair da área permitida de circulação, e prevenção contra furtos ou roubos.
+        </div>
+        <div class="section">
+          Os locatários deverão cumprir o horário estabelecido, devolvendo a bicicleta no mesmo local onde foi realizada a retirada, assinando o termo de entrega após a vistoria do funcionário responsável da Redepharma, com tolerância máxima de 15 minutos.
+        </div>
+        <div class="section">
+          Caso a bicicleta não seja devolvida no prazo estabelecido, sem justificativa, você deverá arcar com o custo na totalidade, sob pena de ser acionada a Polícia Militar.
+        </div>
+        <div class="section">
+          Se a sua bicicleta for furtada ou roubada por um terceiro, deverá comunicar imediatamente a Redepharma para que sejam tomadas as medidas cabíveis.
+        </div>
+        <div class="page2">
+          <p><strong>Nome:</strong> ${locacao.nome}</p>
+          <p><strong>CPF:</strong> ${locacao.cpf}</p>
+          <p><strong>Telefone:</strong> ${locacao.telefone}</p>
+          <p><strong>Endereço:</strong> ${locacao.endereco}</p>
+          <p><strong>Data:</strong> ${new Date(locacao.data_inicio).toLocaleDateString('pt-BR')} às ${new Date(locacao.data_inicio).toLocaleTimeString('pt-BR')}</p>
 
-      Assinatura_________________________________     Data Início: ______________
-
-      Assinatura_________________________________     Data Fim: ______________
+          <div class="assinatura">
+            <p>Assinatura do Usuario:</p>
+            <p>_________________________________________</p>
+            <p>Data Início: ___/____/_______</p>
+          </div>
+          <div class="assinatura">
+            <p>Assinatura do Funcionário:</p>
+            <p>_________________________________________</p>
+            <p>Data Fim: ___/____/_______</p>
+          </div>
+        </div>
+      </body>
+    </html>
     `;
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<pre>${termoContent}</pre>`);
+    printWindow.document.write(termoContent);
     printWindow.document.close();
     printWindow.print();
   }
 
-  // Funções de Paginação
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredLocacoes.slice(indexOfFirstItem, indexOfLastItem);
@@ -175,12 +274,13 @@ function LocacoesTable({ departmentId, user }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="select select-bordered"
+            className={`select select-bordered ${statusFilter === "Pendente" ? "select-info" : statusFilter === "Em Trânsito" ? "select-warning" : statusFilter === "Cancelado" ? "select-error" : statusFilter === "Finalizado" ? "select-success" : "select-accent"} outline-none`}
           >
             <option value="">Todos</option>
             <option value="Pendente">Pendente</option>
             <option value="Em Trânsito">Em Trânsito</option>
             <option value="Finalizado">Finalizado</option>
+            <option value="Cancelado">Cancelado</option>
           </select>
         </label>
       </div>
@@ -208,7 +308,7 @@ function LocacoesTable({ departmentId, user }) {
             <tr key={locacao.id_locacao} className='hover text-[15px]'>
               <td>#{locacao.id_locacao}</td>
               <td>{locacao.id_bicicleta}</td>
-              <td>{locacao.nome.split(' ')[0]}</td>
+              <td>{locacao.nome?.split(' ')[0]}</td>
               <td>
                 {locacao.status === "Finalizado" ? (
                   <div className="select select-success outline-none cursor-default flex items-center w-[133px]">
@@ -217,18 +317,19 @@ function LocacoesTable({ departmentId, user }) {
                 ) : (
                   <select
                     value={locacao.status}
-                    onChange={(e) => handleStatusChange(locacao.id_locacao, e.target.value, locacao.horas)}
-                    className={`select ${locacao.status === "Pendente" ? "select-info" : locacao.status === "Em Trânsito" ? "select-warning" : "select-success"} outline-none`}
+                    onChange={(e) => handleStatusChange(locacao.id_locacao, e.target.value, locacao.horas, currentPage)}
+                    className={`select ${locacao.status === "Pendente" ? "select-info" : locacao.status === "Em Trânsito" ? "select-warning" : locacao.status === "Cancelado" ? "select-error" : "select-success"} outline-none`}
                   >
-                    <option value="Pendente" disabled={locacao.status === 'Em Trânsito'}>Pendente</option>
-                    <option value="Em Trânsito">Em Trânsito</option>
-                    <option value="Finalizado">Finalizado</option>
+                    <option value="Pendente" disabled={locacao.status === 'Em Trânsito' || locacao.status === 'Cancelado'}>Pendente</option>
+                    <option value="Em Trânsito" disabled={locacao.status === "Cancelado"}>Em Trânsito</option>
+                    <option value="Finalizado" disabled={locacao.status === "Cancelado"}>Finalizado</option>
+                    <option value="Cancelado">Cancelado</option>
                   </select>
                 )}
               </td>
-              <td className='text-[12px]'>{locacao.data_inicio ? date.format(new Date(locacao.data_inicio), 'DD/MM/YYYY [ás] HH:mm:ss') : 'DD/MM/YYYY [ás] HH:mm:ss'}</td>
-              <td className='text-[12px]'>{locacao.data_entrega ? date.format(new Date(locacao.data_entrega), 'DD/MM/YYYY [ás] HH:mm:ss') : 'DD/MM/YYYY [ás] HH:mm:ss'}</td>
-              <td className='text-[12px]'>{locacao.data_fim ? date.format(new Date(locacao.data_fim), 'DD/MM/YYYY [ás] HH:mm:ss') : 'DD/MM/YYYY [ás] HH:mm:ss'}</td>
+              <td className='text-[12px]'>{locacao.data_inicio ? date.format(new Date(locacao.data_inicio), 'DD/MM/YYYY [ás] HH:mm:ss') : ''}</td>
+              <td className='text-[12px]'>{locacao.data_entrega ? date.format(new Date(locacao.data_entrega), 'DD/MM/YYYY [ás] HH:mm:ss') : ''}</td>
+              <td className='text-[12px]'>{locacao.data_fim ? date.format(new Date(locacao.data_fim), 'DD/MM/YYYY [ás] HH:mm:ss') : ''}</td>
               <td className='text-[12px]'>{date.format(new Date(locacao.data_cad), 'DD/MM/YYYY [ás] HH:mm:ss')}</td>
               <td>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.preco)}</td>
               <td>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.preco_hr)}</td>

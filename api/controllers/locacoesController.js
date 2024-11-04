@@ -1,30 +1,97 @@
 const pool = require('../db');
 
 async function getResumoLocacoes(req, res) {
+  const { department_id } = req.body;
   try {
+    let totalQuery = ''
+    let abertasQuery = ''
+    let concluidasQuery = ''
+    if (department_id != 1) {
+      console.log('aloooeer', department_id)
+      totalQuery = await pool
+        .query(`
+          SELECT SUM(valor_total) AS valorTotalConcluidas, id_filial
+          FROM locacoes
+          WHERE status = 'Finalizado' AND DATE(data_fim) = CURDATE() AND id_filial = ?
+          GROUP BY id_filial
+        `, [department_id]);
 
-    const totalQuery = await pool
-      .query(`
-        SELECT SUM(valor) AS valorTotalConcluidas
+      abertasQuery = await pool
+        .query(`
+        SELECT COUNT(*) AS totalEmAberto, id_filial
         FROM locacoes
-        WHERE status = 'Concluída' AND DATE(data_fim) = CURDATE()
-      `);
+        WHERE status = 'Em Trânsito' AND id_filial = ?
+        GROUP BY id_filial
+      `, [department_id]);
 
-    const valorTotalConcluidas = totalQuery[0].valorTotalConcluidas || 0;
-
-    const abertasQuery = await pool
-      .query(`
-        SELECT COUNT(*) AS totalEmAberto
+      concluidasQuery = await pool
+        .query(`
+        SELECT COUNT(*) AS totalFinalizado, id_filial
         FROM locacoes
-        WHERE status = 'Pendente' OR status = 'Em Progresso'
-      `);
+        WHERE (status = 'Finalizado' OR status = 'Cancelado') AND id_filial = ?
+        GROUP BY id_filial
+      `, [department_id]);
+    } else {
+      totalQuery = await pool
+        .query(`
+          SELECT SUM(valor_total) AS valorTotalConcluidas, id_filial
+          FROM locacoes
+          WHERE status = 'Finalizado' AND MONTH(data_fim) = MONTH(CURDATE())
+          GROUP BY id_filial
+        `, []);
 
-    const totalEmAberto = abertasQuery[0].totalEmAberto || 0;
+      abertasQuery = await pool
+        .query(`
+        SELECT COUNT(*) AS totalEmAberto, id_filial
+        FROM locacoes
+        WHERE status = 'Em Trânsito'
+        GROUP BY id_filial
+      `, []);
 
-    res.json({
-      valorTotalConcluidas,
-      totalEmAberto
+      concluidasQuery = await pool
+        .query(`
+        SELECT COUNT(*) AS totalFinalizado, id_filial
+        FROM locacoes
+        WHERE (status = 'Finalizado' OR status = 'Cancelado')
+        GROUP BY id_filial
+      `, []);
+    }
+
+    console.log(concluidasQuery[0], abertasQuery[0], totalQuery[0])
+
+    const combinacao = totalQuery[0].map(total => {
+      const aberta = abertasQuery[0].find(item => item.id_filial === total.id_filial) || { totalEmAberto: 0 };
+      const concluida = concluidasQuery[0].find(item => item.id_filial === total.id_filial) || { totalFinalizado: 0 };
+
+      return {
+        id_filial: total.id_filial,
+        valorTotalConcluidas: total.valorTotalConcluidas,
+        totalEmAberto: aberta.totalEmAberto,
+        totalFinalizado: concluida.totalFinalizado
+      };
     });
+
+    const allFiliais = new Set([
+      ...totalQuery[0].map(item => item.id_filial),
+      ...abertasQuery[0].map(item => item.id_filial),
+      ...concluidasQuery[0].map(item => item.id_filial)
+    ]);
+
+    allFiliais.forEach(id_filial => {
+      if (!combinacao.find(item => item.id_filial === id_filial)) {
+        const aberta = abertasQuery[0].find(item => item.id_filial === id_filial) || { totalEmAberto: 0 };
+        const concluida = concluidasQuery[0].find(item => item.id_filial === id_filial) || { totalFinalizado: 0 };
+
+        combinacao.push({
+          id_filial,
+          valorTotalConcluidas: 0,
+          totalEmAberto: aberta.totalEmAberto,
+          totalFinalizado: concluida.totalFinalizado
+        });
+      }
+    });
+    console.log(combinacao)
+    res.json(combinacao);
   } catch (error) {
     console.error('Erro ao obter o resumo das locações:', error);
     res.status(500).json({ message: 'Erro ao obter o resumo das locações' });
@@ -34,28 +101,52 @@ async function getResumoLocacoes(req, res) {
 async function getTodasLocacoes(req, res) {
   const { department_id } = req.body;
   try {
-    const [locacoes] = await pool.query(`
-      SELECT 
-      loc.id_locacao, 
-      loc.id_bicicleta, 
-      cli.*, 
-      bic.preco_hr, 
-      bic.preco, 
-      loc.data_inicio, 
-      loc.data_fim,
-      loc.data_entrega,
-      loc.data_cad, 
-      loc.status, 
-      loc.valor_total,
-      loc.horas 
-      FROM redeph12_bikepharma.locacoes loc
-      INNER JOIN redeph12_bikepharma.bicicletas bic ON loc.id_bicicleta = bic.id_bicicleta AND loc.id_filial = bic.id_filial
-      INNER JOIN redeph12_bikepharma.clientes cli ON loc.id_cliente = cli.id_cliente
-      WHERE loc.id_filial = ?
-      ORDER BY loc.id_locacao ASC;
-    `, [department_id]);
+    let [locacoes] = ``;
 
-    res.json(locacoes);
+    if (department_id == 1) {
+      console.log('aloooddd')
+      locacoes = await pool.query(`
+        SELECT 
+        loc.id_locacao, 
+        loc.id_bicicleta, 
+        cli.*, 
+        bic.preco_hr, 
+        bic.preco, 
+        loc.data_inicio, 
+        loc.data_fim,
+        loc.data_entrega,
+        loc.data_cad, 
+        loc.status, 
+        loc.valor_total,
+        loc.horas 
+        FROM redeph12_bikepharma.locacoes loc
+        INNER JOIN redeph12_bikepharma.bicicletas bic ON loc.id_bicicleta = bic.id_bicicleta AND loc.id_filial = bic.id_filial
+        INNER JOIN redeph12_bikepharma.clientes cli ON loc.id_cliente = cli.id_cliente
+        ORDER BY loc.id_locacao ASC;
+      `, []);
+    } else {
+      locacoes = await pool.query(`
+        SELECT 
+        loc.id_locacao, 
+        loc.id_bicicleta, 
+        cli.*, 
+        bic.preco_hr, 
+        bic.preco, 
+        loc.data_inicio, 
+        loc.data_fim,
+        loc.data_entrega,
+        loc.data_cad, 
+        loc.status, 
+        loc.valor_total,
+        loc.horas 
+        FROM redeph12_bikepharma.locacoes loc
+        INNER JOIN redeph12_bikepharma.bicicletas bic ON loc.id_bicicleta = bic.id_bicicleta AND loc.id_filial = bic.id_filial
+        INNER JOIN redeph12_bikepharma.clientes cli ON loc.id_cliente = cli.id_cliente
+        WHERE loc.id_filial = ?
+        ORDER BY loc.id_locacao ASC;
+      `, [department_id]);
+    }
+    res.json(locacoes[0]);
   } catch (error) {
     console.error('Erro ao obter todas as locações:', error);
     res.status(500).json({ message: 'Erro ao obter as locações.' });
@@ -91,7 +182,8 @@ async function criarLocacao(req, res) {
 
 async function getLocacaoById(id) {
   try {
-    const query = `SELECT 
+    const query = `
+    SELECT 
       loc.id_locacao, 
       loc.id_bicicleta, 
       cli.*, 
@@ -108,9 +200,9 @@ async function getLocacaoById(id) {
       INNER JOIN redeph12_bikepharma.bicicletas bic ON loc.id_bicicleta = bic.id_bicicleta AND loc.id_filial = bic.id_filial
       INNER JOIN redeph12_bikepharma.clientes cli ON loc.id_cliente = cli.id_cliente
       WHERE loc.id_locacao = ?
-      ORDER BY loc.id_locacao ASC;`;
+      ORDER BY loc.id_locacao ASC`;
     const [rows] = await pool.query(query, [id]);
-    
+
     return rows.length > 0 ? rows[0] : null;
   } catch (error) {
     console.error('Erro ao buscar a locação:', error);
@@ -138,17 +230,17 @@ async function atualizarStatusLocacao(req, res) {
     let updatedValorTotal;
 
     if (status === 'Em Trânsito') {
-      const currentDate = new Date();
+      const currentDate = new Date(2024, 10, 4, 15, 30, 0, 0);
       const updatedDataEntrega = new Date(currentDate.getTime() + horas * 60 * 60 * 1000);
-      
+
       query += `, data_inicio = ?, data_entrega = ?`;
       params.splice(1, 0, currentDate, updatedDataEntrega);
     }
 
     if (status === 'Finalizado') {
-      const updatedDataFim = new Date();
+      const updatedDataFim = new Date(2024, 10, 4, 16, 46, 0, 0);
       const diffMs = updatedDataFim - locacaoAtual.data_entrega;
-      if(locacaoAtual.status === 'Pendente'){
+      if (locacaoAtual.status === 'Pendente') {
         updatedValorTotal = locacaoAtual.preco;
       }
       else if (diffMs < 0) {
@@ -168,6 +260,12 @@ async function atualizarStatusLocacao(req, res) {
       params.splice(1, 0, updatedDataFim, updatedValorTotal);
     }
 
+    if (status === 'Cancelado') {
+      const currentDate = new Date();
+      query += `, data_fim = ?`;
+      params.splice(1, 0, currentDate);
+    }
+
     query += ` WHERE id_locacao = ?`;
 
     const [result] = await pool.query(query, params);
@@ -182,7 +280,7 @@ async function atualizarStatusLocacao(req, res) {
       status,
       data_inicio: status === 'Em Trânsito' ? new Date() : locacaoAtual.data_inicio,
       data_entrega: status === 'Em Trânsito' ? new Date(new Date().getTime() + horas * 60 * 60 * 1000) : locacaoAtual.data_entrega,
-      data_fim: status === 'Finalizado' ? new Date() : locacaoAtual.data_fim,
+      data_fim: status === 'Finalizado' || status === 'Cancelado' ? new Date() : locacaoAtual.data_fim,
       valor_total: updatedValorTotal || locacaoAtual.valor_total,
     });
   } catch (error) {
