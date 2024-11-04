@@ -160,16 +160,16 @@ function LocacoesTable({ departmentId, user }) {
           O objetivo de disponibilizar a bicicleta para utilização pelos usuários aos arredores da Redepharma é reafirmar nosso propósito enraizado na cultura da empresa, a promoção da saúde e bem-estar de todos nossos clientes.
         </div>
         <div class="section">
-          Além disso, vale ressaltar que todo valor arrecadado pelo projeto Bikepharma será destinado ao Hospital da FAP, localizado na cidade de Campina Grande - Paraíba, como forma de doação e com o intuito de, solidariamente, ajudar esse hospital que presta um serviço necessário a toda população campinense e de regiões vizinhas.
+          Além disso, vale ressaltar que todo valor arrecadado pelo projeto Bikepharma será destinado ao Hospital Napoleão Laureano na cidade de João pessoa - Paraíba como forma de doação e com o intuito de, solidariamente, ajudar esse hospital que presta um serviço necessário a toda população pessoense e de regiões vizinhas.
         </div>
         <div class="section">
-          O aluguel será no valor mínimo de R$ 10,00 (10 reais), porém caso você sinta o desejo e a motivação de doar mais algum valor, sinta-se à vontade para alugar a bicicleta pelo valor que você achar essencial que será para bem um maior.
+          O aluguel será no valor mínimo de R$ 15,00 (quinze reais), porém caso você sinta o desejo e a motivação de doar mais algum valor, sinta-se à vontade para alugar a bicicleta pelo valor que você achar essencial que será para um bem maior.
         </div>
         <div class="section">
-          O tempo máximo do aluguel será de 1 hora, com possibilidade de renovar a concessão por mais 30 minutos.
+          O tempo máximo do aluguel será de 1 hora, com possibilidade de renovar a concessão por mais 1 hora.
         </div>
         <div class="section">
-          É necessário realizar um cadastro prévio, de forma verdadeira e completa, devendo estar em porte um documento com foto (ex.: RG, passaporte, carteira da OAB, CNH etc.) que comprovem a identidade da pessoa que estará utilizando, bem como assinar o presente termo e realizar o pagamento para o colaborador responsável da Redepharma.
+          É necessário realizar um cadastro prévio, de forma verdadeira e completa, devendo estar em porte um documento com foto e xerox dos respectivos (RG, passaporte, carteira da OAB, CNH e comprovante de residencia) que comprovem a identidade da pessoa que estará utilizando, bem como assinar o presente termo e realizar o pagamento para o colaborador responsável da Redepharma.
         </div>
         <div class="section">
           A bicicleta tem uso individual e intransferível, apenas em casos do responsável legal alugar para o menor.
@@ -178,10 +178,10 @@ function LocacoesTable({ departmentId, user }) {
           Ao assinar o termo de uso e responsabilidade, o locatário se compromete a utilizar a bicicleta de forma responsável e cumprir o prazo estabelecido de tempo, devolvendo sem nenhum vício ou defeito e não utilizando de forma inadequada, sob pena de arcar com os custos de consertos.
         </div>
         <div class="section">
-          O uso inadequado da bicicleta é qualquer conduta que extrapole o uso comum de uma bicicleta urbana, como por exemplo: pedalar erguendo a roda dianteira da bicicleta; utilizar o freio dianteiro para erguer a parte traseira da bicicleta ou o freio traseiro para realizar derrapagens, pedalar em velocidade inadequada à via em que transita ou em desacordo com as normas de trânsito.
+          É vedado o uso inadequado da bicicleta e qualquer conduta que extrapole o uso comum de uma bicicleta urbana, como por exemplo: pedalar erguendo a roda dianteira da bicicleta; utilizar o freio dianteiro para erguer a parte traseira da bicicleta ou o freio traseiro para realizar derrapagens, pedalar em velocidade inadequada à via em que transita ou em desacordo com as normas de trânsito.
         </div>
         <div class="section">
-          É proibido a utilização da bicicleta para fins de prestação de serviços (ex.: comerciais, entregador de delivery etc.) e que não seja para lazer, e deverá circular pelas redondezas da Redepharma, do Açude Velho e Parque da Criança.
+          É proibido a utilização da bicicleta para fins de prestação de serviços (ex.: comerciais, entregador de delivery etc.) e que não seja para lazer,  deverá circular pelas redondezas da Redepharma localizada na Av. Nego, 870, bairro Tambaú, João Pessoa - PB e, num raio de no máximo 4 kilômetros da loja. Caso este limite seja ultrapassado a polícia poderá ser acionada imediatamente.
         </div>
         <div class="section">
           Todas as bicicletas terão um chip de localização, para controle e segurança de possíveis usos inadequados, como sair da área permitida de circulação, e prevenção contra furtos ou roubos.
@@ -190,10 +190,10 @@ function LocacoesTable({ departmentId, user }) {
           Os locatários deverão cumprir o horário estabelecido, devolvendo a bicicleta no mesmo local onde foi realizada a retirada, assinando o termo de entrega após a vistoria do funcionário responsável da Redepharma, com tolerância máxima de 15 minutos.
         </div>
         <div class="section">
-          Caso a bicicleta não seja devolvida no prazo estabelecido, sem justificativa, você deverá arcar com o custo na totalidade, sob pena de ser acionada a Polícia Militar.
+          Caso a bicicleta não seja devolvida no prazo ou sair dos limítes estabelecidos, sem justificativa, você deverá arcar com o custo na totalidade, sob pena de ser acionada a Polícia Militar.
         </div>
         <div class="section">
-          Se a sua bicicleta for furtada ou roubada por um terceiro, deverá comunicar imediatamente a Redepharma para que sejam tomadas as medidas cabíveis.
+          Se a bicicleta for furtada ou roubada por um terceiro, você deverá comunicar imediatamente a Redepharma para que sejam tomadas as medidas cabíveis.
         </div>
         <div class="page2">
           <p><strong>Nome:</strong> ${locacao.nome}</p>
@@ -201,16 +201,17 @@ function LocacoesTable({ departmentId, user }) {
           <p><strong>Telefone:</strong> ${locacao.telefone}</p>
           <p><strong>Endereço:</strong> ${locacao.endereco}</p>
           <p><strong>Data:</strong> ${new Date(locacao.data_inicio).toLocaleDateString('pt-BR')} às ${new Date(locacao.data_inicio).toLocaleTimeString('pt-BR')}</p>
+          <p><strong>Preço:</strong> ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.preco)}</p>
+          <p>Data Início: ${locacao.data_inicio}</p>
+          <p>Data Entrega: ${locacao.data_entrega}</p>
 
           <div class="assinatura">
-            <p>Assinatura do Usuario:</p>
             <p>_________________________________________</p>
-            <p>Data Início: ___/____/_______</p>
+            <p>Assinatura do Usuario</p>
           </div>
           <div class="assinatura">
-            <p>Assinatura do Funcionário:</p>
             <p>_________________________________________</p>
-            <p>Data Fim: ___/____/_______</p>
+            <p>Assinatura do Funcionário</p>
           </div>
         </div>
       </body>
