@@ -3,16 +3,10 @@ services:
   api:
     build: ./api
     ports:
-      - '3001:3001'
-    volumes:
-      - ./api:/app
-    command: npm start
+      - '3006:3006'
   web:
     build: ./web
     ports:
-      - '3000:3000'
-    environment:
-      NEXT_PUBLIC_API_URL: 'http://api:3001'
-    volumes:
-      - ./web:/app
-    command: npm run dev
+      - '3005:3005'
+    depends_on: 
+      - api
