@@ -6,8 +6,7 @@ async function getResumoLocacoes(req, res) {
     let totalQuery = ''
     let abertasQuery = ''
     let concluidasQuery = ''
-    if (department_id != 1) {
-      console.log('aloooeer', department_id)
+    if (department_id != 1 || department_id != 33) {
       totalQuery = await pool
         .query(`
           SELECT SUM(valor_total) AS valorTotalConcluidas, id_filial
@@ -57,8 +56,6 @@ async function getResumoLocacoes(req, res) {
       `, []);
     }
 
-    console.log(concluidasQuery[0], abertasQuery[0], totalQuery[0])
-
     const combinacao = totalQuery[0].map(total => {
       const aberta = abertasQuery[0].find(item => item.id_filial === total.id_filial) || { totalEmAberto: 0 };
       const concluida = concluidasQuery[0].find(item => item.id_filial === total.id_filial) || { totalFinalizado: 0 };
@@ -90,10 +87,9 @@ async function getResumoLocacoes(req, res) {
         });
       }
     });
-    console.log(combinacao)
     res.json(combinacao);
   } catch (error) {
-    console.error('Erro ao obter o resumo das locações:', error);
+    console.error('Erro ao obter o resumo das locações:');
     res.status(500).json({ message: 'Erro ao obter o resumo das locações' });
   }
 }
@@ -103,8 +99,7 @@ async function getTodasLocacoes(req, res) {
   try {
     let [locacoes] = ``;
 
-    if (department_id == 1) {
-      console.log('aloooddd')
+    if (department_id == 1 || department_id == 33) {
       locacoes = await pool.query(`
         SELECT 
         loc.id_locacao, 
@@ -148,15 +143,13 @@ async function getTodasLocacoes(req, res) {
     }
     res.json(locacoes[0]);
   } catch (error) {
-    console.error('Erro ao obter todas as locações:', error);
+    console.error('Erro ao obter todas as locações:');
     res.status(500).json({ message: 'Erro ao obter as locações.' });
   }
 }
 
 async function criarLocacao(req, res) {
   const { cliente, bicicleta_id, status, department_id, horas } = req.body;
-
-  console.log(cliente)
 
   if (!cliente || !bicicleta_id) {
     return res.status(400).json({ message: 'Campos obrigatórios ausentes.' });
@@ -175,7 +168,7 @@ async function criarLocacao(req, res) {
       locacaoId: result.insertId
     });
   } catch (error) {
-    console.error('Erro ao criar a locação:', error);
+    console.error('Erro ao criar a locação:');
     res.status(500).json({ message: 'Erro ao criar a locação.' });
   }
 }
@@ -284,7 +277,7 @@ async function atualizarStatusLocacao(req, res) {
       valor_total: updatedValorTotal || locacaoAtual.valor_total,
     });
   } catch (error) {
-    console.error('Erro ao atualizar o status da locação:', error);
+    console.error('Erro ao atualizar o status da locação:');
     res.status(500).json({ message: 'Erro ao atualizar o status da locação.' });
   }
 }

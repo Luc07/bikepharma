@@ -9,7 +9,7 @@ async function getUsuario(req, res) {
 
   try {
     const [result] = await pool.query(`
-      SELECT * FROM redeph12_usuarios.users WHERE user_id = ? AND department_id IN (1098, 1055, 1)
+      SELECT * FROM redeph12_usuarios.users WHERE user_id = ? AND department_id IN (1098, 1055, 1, 33)
     `, [id_usuario]);
 
     if (result.length === 0) {

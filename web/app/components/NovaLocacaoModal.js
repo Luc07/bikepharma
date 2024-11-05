@@ -58,7 +58,6 @@ function NovaLocacaoModal({ isOpen, onClose, departmentId }) {
       });
       
       const data = await response.json();
-      console.log(data)
       setBicicletas(data);
     } catch (error) {
       console.error('Erro ao buscar bicicletas:');

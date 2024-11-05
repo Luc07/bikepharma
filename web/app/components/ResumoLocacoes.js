@@ -9,7 +9,6 @@ function ResumoLocacoes({ departmentId }) {
   useEffect(() => {
     axios.post(`${process.env.NEXT_PUBLIC_API_URL}/locacoes/resumo`, { department_id: departmentId }).then(result => {
       setResumo(result.data)
-      console.log(result.data)
     })
   }, [departmentId]);
 

@@ -47,7 +47,6 @@ function LocacoesTable({ departmentId, user }) {
     }
 
     if (endDate) {
-      console.log(date.addHours(new Date(endDate), 3))
       filtered = filtered.filter((locacao) => {
         const locacaoDate = new Date(locacao.data_cad);
         return locacaoDate.setHours(0, 0, 0, 0) <= date.addHours(new Date(endDate), 3);
