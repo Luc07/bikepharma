@@ -6,7 +6,7 @@ async function getResumoLocacoes(req, res) {
     let totalQuery = ''
     let abertasQuery = ''
     let concluidasQuery = ''
-    if (department_id != 1 || department_id != 33) {
+    if (department_id != 1 && department_id != 33) {
       totalQuery = await pool
         .query(`
           SELECT SUM(valor_total) AS valorTotalConcluidas, id_filial
@@ -223,7 +223,7 @@ async function atualizarStatusLocacao(req, res) {
     let updatedValorTotal;
 
     if (status === 'Em Trânsito') {
-      const currentDate = new Date(2024, 10, 4, 15, 30, 0, 0);
+      const currentDate = new Date();
       const updatedDataEntrega = new Date(currentDate.getTime() + horas * 60 * 60 * 1000);
 
       query += `, data_inicio = ?, data_entrega = ?`;
@@ -231,22 +231,19 @@ async function atualizarStatusLocacao(req, res) {
     }
 
     if (status === 'Finalizado') {
-      const updatedDataFim = new Date(2024, 10, 4, 16, 46, 0, 0);
+      const updatedDataFim = new Date();
       const diffMs = updatedDataFim - locacaoAtual.data_entrega;
-      if (locacaoAtual.status === 'Pendente') {
-        updatedValorTotal = locacaoAtual.preco;
-      }
-      else if (diffMs < 0) {
-        updatedValorTotal = locacaoAtual.preco;
+      if (diffMs < 0) {
+        updatedValorTotal = locacaoAtual.preco * horas;
       } else {
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const remainingMins = diffMins % 60;
-
+        let qtdTarifasPagar = 0
+        let hours = diffMs / 3_600_000;
+        while (hours > 0.25) {
+          qtdTarifasPagar += 1
+          hours -= 1
+        }
         const preco = parseFloat(locacaoAtual.preco);
-        const precoHr = parseFloat(locacaoAtual.preco_hr);
-
-        updatedValorTotal = preco + (precoHr * diffHours) + (remainingMins > 15 ? precoHr : 0);
+        updatedValorTotal = (preco * qtdTarifasPagar) + (preco * horas);
       }
 
       query += `, data_fim = ?, valor_total = ?`;

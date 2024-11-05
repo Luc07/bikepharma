@@ -31,7 +31,7 @@ function LocacoesTable({ departmentId, user }) {
         setLocacoes(response.data);
         setFilteredLocacoes(response.data);
       } catch (error) {
-        console.error("Erro ao buscar locações:", error);
+        console.error("Erro ao buscar locações:");
       }
     }
   }
@@ -93,9 +93,9 @@ function LocacoesTable({ departmentId, user }) {
       <head>
         <style>
           body {
-            font-size: 18px; /* Define o tamanho da fonte */
-            font-family: Arial, sans-serif; /* Define a fonte */
-            line-height: 1.5; /* Define o espaçamento entre linhas */
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
             text-align: center;
           }
           h2 {
@@ -132,8 +132,8 @@ function LocacoesTable({ departmentId, user }) {
       <head>
         <style>
           body {
-            font-size: 18px; /* Define o tamanho da fonte */
-            font-family: Arial, sans-serif; /* Define a fonte */
+            font-size: 18px;
+            font-family: Arial, sans-serif;
             display: flex;
             line-height: normal;
             flex-direction: column;
@@ -199,10 +199,8 @@ function LocacoesTable({ departmentId, user }) {
           <p><strong>CPF:</strong> ${locacao.cpf}</p>
           <p><strong>Telefone:</strong> ${locacao.telefone}</p>
           <p><strong>Endereço:</strong> ${locacao.endereco}</p>
-          <p><strong>Data:</strong> ${new Date(locacao.data_inicio).toLocaleDateString('pt-BR')} às ${new Date(locacao.data_inicio).toLocaleTimeString('pt-BR')}</p>
-          <p><strong>Preço:</strong> ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.preco)}</p>
-          <p>Data Início: ${locacao.data_inicio}</p>
-          <p>Data Entrega: ${locacao.data_entrega}</p>
+          <p><strong>Data Cadastro:</strong> ${new Date(locacao.data_cad).toLocaleDateString('pt-BR')} às ${new Date(locacao.data_cad).toLocaleTimeString('pt-BR')}</p>
+          <p><strong>Preço:</strong> ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(locacao.preco * locacao.horas)}</p>
 
           <div class="assinatura">
             <p>_________________________________________</p>
@@ -322,7 +320,7 @@ function LocacoesTable({ departmentId, user }) {
                   >
                     <option value="Pendente" disabled={locacao.status === 'Em Trânsito' || locacao.status === 'Cancelado'}>Pendente</option>
                     <option value="Em Trânsito" disabled={locacao.status === "Cancelado"}>Em Trânsito</option>
-                    <option value="Finalizado" disabled={locacao.status === "Cancelado"}>Finalizado</option>
+                    <option value="Finalizado" disabled={locacao.status === "Cancelado" || locacao.status === "Pendente"}>Finalizado</option>
                     <option value="Cancelado">Cancelado</option>
                   </select>
                 )}
@@ -338,7 +336,7 @@ function LocacoesTable({ departmentId, user }) {
                 <button onClick={() => imprimirTermoAceite(locacao)} className='btn btn-sm btn-outline'><FaFileAlt className='mr-1' size={15} color='orange' />Imprimir</button>
               </td>
               <td>
-                <button onClick={() => imprimirCupom(locacao)} className='btn btn-sm btn-outline'><RiCouponFill className='mr-1' size={15} color='orange' />Imprimir</button>
+                <button onClick={() => imprimirCupom(locacao)} className='btn btn-sm btn-outline' disabled={locacao.status != 'Finalizado'}><RiCouponFill className='mr-1' size={15} color='orange'/>Imprimir</button>
               </td>
             </tr>
           ))}

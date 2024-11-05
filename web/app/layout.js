@@ -1,7 +1,6 @@
-'use client'
 import localFont from "next/font/local";
 import "./globals.css";
-import { AuthProvider } from "./context/AuthContext";
+import Provider from "./components/Provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,15 +13,20 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+export const metadata = {
+  title: 'BikePharma',
+  description: 'REDEPHARMA - Lucas007'
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-        {children}
-        </AuthProvider>
+        <Provider>
+          {children}
+        </Provider>
       </body>
     </html>
   );
